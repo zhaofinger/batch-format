@@ -4,6 +4,7 @@ const path = require('path');
 const readline = require('readline');
 
 const ROOT_PATH = vscode.workspace.rootPath;
+const IGNORE_EXT = new Array('bmp', 'jpg', 'jpeg', 'png', 'gif', 'mp3', 'mp4', 'zip', 'rar');
 
 function formatCurrentFile() {
   return new Promise((resolve, reject) => {
@@ -38,7 +39,10 @@ function getFiles(rootPath, callback) {
       let filedir = path.join(rootPath, fileName);
       let fileStat = fs.statSync(filedir);
       if (fileStat.isFile()) {
-        callback(filedir);
+        let ext = fileName.split('.').pop();
+        if (!IMG_EXT_ARR.includes(ext)) {
+          callback(filedir);
+        }
       } else if (fileStat.isDirectory()) {
         getFiles(filedir, callback);
       }

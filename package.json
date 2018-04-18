@@ -2,7 +2,7 @@
     "name": "batch-format",
     "displayName": "batch format",
     "description": "batch format files",
-    "version": "0.0.1",
+    "version": "0.3.3",
     "publisher": "zhaofinger",
     "engines": {
         "vscode": "^1.22.0"
@@ -10,6 +10,7 @@
     "categories": [
         "Other"
     ],
+    "icon": "logo.png",
     "activationEvents": [
         "onCommand:extension.batchFormatFiles"
     ],
