@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 const ROOT_PATH = vscode.workspace.rootPath;
 
@@ -10,20 +11,42 @@ function formatCurrentFile() {
       vscode.commands.executeCommand('workbench.action.nextEditor').then(() => {
         resolve();
       });
+    }, () => {
+      vscode.commands.executeCommand('workbench.action.nextEditor').then(() => {
+        resolve();
+      });
     });
   });
 }
 
+function getIgnoreFile(ignoreFile) {
+  let ignoreFileArr = ['node_modules', 'vendor'];
+  if (fs.existsSync(ignoreFile)) {
+    let fileData = fs.readFileSync(ignoreFile, 'utf-8');
+    ignoreFileArr = fileData.split('\n');
+  }
+  return ignoreFileArr;
+}
+
 function getFiles(rootPath, callback) {
-  fs.readdirSync(rootPath).forEach(fileName => {
-    let filedir = path.join(rootPath, fileName);
-    let fileStat = fs.statSync(filedir);
-    if (fileStat.isFile()) {
-      callback(filedir);
-    } else if (fileStat.isDirectory()) {
-      getFiles(filedir, callback);
-    }
-  });
+  // 根据 .gitignore 读取忽略文件
+  const ignoreFileArr = getIgnoreFile(path.join(rootPath, '.gitignore'));
+  let ignoreFileStr = ignoreFileArr.join('');
+  try {
+    fs.readdirSync(rootPath).forEach(fileName => {
+      if (ignoreFileStr.includes(fileName)) return;
+      let filedir = path.join(rootPath, fileName);
+      let fileStat = fs.statSync(filedir);
+      if (fileStat.isFile()) {
+        callback(filedir);
+      } else if (fileStat.isDirectory()) {
+        getFiles(filedir, callback);
+      }
+    });
+  } catch (error) {
+    vscode.window.showInformationMessage(error);
+  }
+
 }
 
 function activate(context) {
@@ -38,7 +61,7 @@ function activate(context) {
     for (let i = 0; i <= counter; i++) {
       formatFunArr.push(formatCurrentFile);
     }
-    vscode.window.showInformationMessage(formatFunArr.length + '');
+    formatFunArr.reduce((prev, cur) => prev.then(() => cur()), Promise.resolve());
   });
   context.subscriptions.push(disposable);
 }
