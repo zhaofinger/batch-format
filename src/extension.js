@@ -21,7 +21,7 @@ function formatCurrentFile() {
 }
 
 function getIgnoreFile(ignoreFile) {
-  let ignoreFileArr = ['node_modules', 'vendor'];
+  let ignoreFileArr = ['node_modules', 'vendor', '.git'];
   if (fs.existsSync(ignoreFile)) {
     let fileData = fs.readFileSync(ignoreFile, 'utf-8');
     ignoreFileArr = fileData.split('\n');
